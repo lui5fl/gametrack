@@ -88,3 +88,9 @@ fastlane/test_output
 # https://github.com/johnno1962/injectionforxcode
 
 iOSInjectionProject/
+
+# API Key Preferences List file
+Key.plist
+
+# Misc
+.DS_Store

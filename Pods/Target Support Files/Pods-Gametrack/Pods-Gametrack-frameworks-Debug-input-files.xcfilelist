@@ -1,0 +1,5 @@
+${PODS_ROOT}/Target Support Files/Pods-Gametrack/Pods-Gametrack-frameworks.sh
+${BUILT_PRODUCTS_DIR}/GRDB.swift/GRDB.framework
+${BUILT_PRODUCTS_DIR}/IGDB-SWIFT-API/IGDB_SWIFT_API.framework
+${BUILT_PRODUCTS_DIR}/Just/Just.framework
+${BUILT_PRODUCTS_DIR}/SwiftProtobuf/SwiftProtobuf.framework
