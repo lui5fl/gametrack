@@ -14,7 +14,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ## IGDB-SWIFT-API
 
-Copyright (c) 2019 husnjak <filip@igdb.com>
+Copyright (c) 2020 husnjak <filip@igdb.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

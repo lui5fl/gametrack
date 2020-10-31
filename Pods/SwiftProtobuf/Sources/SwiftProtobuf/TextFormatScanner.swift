@@ -175,8 +175,8 @@ private func decodeString(_ s: String) -> String? {
 ///
 internal struct TextFormatScanner {
     internal var extensions: ExtensionMap?
-    private var p: UnsafeRawPointer
-    private var end: UnsafeRawPointer
+    private var p: UnsafePointer<UInt8>
+    private var end: UnsafePointer<UInt8>
     private var doubleParser = DoubleParser()
 
     internal var complete: Bool {
@@ -185,7 +185,7 @@ internal struct TextFormatScanner {
         }
     }
 
-    internal init(utf8Pointer: UnsafeRawPointer, count: Int, extensions: ExtensionMap? = nil) {
+    internal init(utf8Pointer: UnsafePointer<UInt8>, count: Int, extensions: ExtensionMap? = nil) {
         p = utf8Pointer
         end = p + count
         self.extensions = extensions
@@ -221,7 +221,7 @@ internal struct TextFormatScanner {
     /// Return a buffer containing the raw UTF8 for an identifier.
     /// Assumes that you already know the current byte is a valid
     /// start of identifier.
-    private mutating func parseUTF8Identifier() -> UnsafeRawBufferPointer {
+    private mutating func parseUTF8Identifier() -> UnsafeBufferPointer<UInt8> {
         let start = p
         loop: while p != end {
             let c = p[0]
@@ -235,7 +235,7 @@ internal struct TextFormatScanner {
                 break loop
             }
         }
-        let s = UnsafeRawBufferPointer(start: start, count: p - start)
+        let s = UnsafeBufferPointer(start: start, count: p - start)
         skipWhitespace()
         return s
     }
@@ -357,7 +357,8 @@ internal struct TextFormatScanner {
     private mutating func parseBytesFromString(terminator: UInt8, into data: inout Data) {
       data.withUnsafeMutableBytes {
         (body: UnsafeMutableRawBufferPointer) in
-        if var out = body.baseAddress, body.count > 0 {
+        if let baseAddress = body.baseAddress, body.count > 0 {
+          var out = baseAddress.assumingMemoryBound(to: UInt8.self)
           while p[0] != terminator {
             let byte = p[0]
             p += 1
@@ -657,7 +658,7 @@ internal struct TextFormatScanner {
               parseBytesFromString(terminator: c, into: &b)
               result.append(b)
             } else {
-              result.append(Data(bytes: p, count: n))
+              result.append(p, count: n)
               p += n + 1 // Skip string body + close quote
             }
         }
@@ -709,7 +710,7 @@ internal struct TextFormatScanner {
                 p += 1
             case asciiLowerF: // f
                 // proto1 allowed floats to be suffixed with 'f'
-                let d = doubleParser.utf8ToDouble(bytes: UnsafeRawBufferPointer(start: start, count: p - start))
+                let d = doubleParser.utf8ToDouble(bytes: start, count: p - start)
                 // Just skip the 'f'
                 p += 1
                 skipWhitespace()
@@ -718,7 +719,7 @@ internal struct TextFormatScanner {
                 break loop
             }
         }
-        let d = doubleParser.utf8ToDouble(bytes: UnsafeRawBufferPointer(start: start, count: p - start))
+        let d = doubleParser.utf8ToDouble(bytes: start, count: p - start)
         skipWhitespace()
         return d
     }
@@ -874,7 +875,7 @@ internal struct TextFormatScanner {
         }
     }
 
-    internal mutating func nextOptionalEnumName() throws -> UnsafeRawBufferPointer? {
+    internal mutating func nextOptionalEnumName() throws -> UnsafeBufferPointer<UInt8>? {
         skipWhitespace()
         if p == end {
             throw TextFormatDecodingError.malformedText

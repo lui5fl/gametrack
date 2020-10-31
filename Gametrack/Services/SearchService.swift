@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import IGDB_SWIFT_API
 
 protocol SearchService {
     

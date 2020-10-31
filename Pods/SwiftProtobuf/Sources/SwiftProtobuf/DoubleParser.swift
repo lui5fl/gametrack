@@ -21,39 +21,46 @@ internal class DoubleParser {
     // In theory, JSON writers should be able to represent any IEEE Double
     // in at most 25 bytes, but many writers will emit more digits than
     // necessary, so we size this generously.
-    private var work = 
-      UnsafeMutableBufferPointer<Int8>.allocate(capacity: 128)
+    #if swift(>=4.1)
+      private var work =
+          UnsafeMutableRawBufferPointer.allocate(byteCount: 128,
+                                                 alignment: MemoryLayout<UInt8>.alignment)
+    #else
+      private var work = UnsafeMutableRawBufferPointer.allocate(count: 128)
+    #endif
 
     deinit {
         work.deallocate()
     }
 
-    func utf8ToDouble(bytes: UnsafeRawBufferPointer,
-                      start: UnsafeRawBufferPointer.Index,
-                      end: UnsafeRawBufferPointer.Index) -> Double? {
-        return utf8ToDouble(bytes: UnsafeRawBufferPointer(rebasing: bytes[start..<end]))
+    func utf8ToDouble(bytes: UnsafeBufferPointer<UInt8>,
+                      start: UnsafeBufferPointer<UInt8>.Index,
+                      end: UnsafeBufferPointer<UInt8>.Index) -> Double? {
+        return utf8ToDouble(bytes: bytes.baseAddress! + start, count: end - start)
     }
 
-    func utf8ToDouble(bytes: UnsafeRawBufferPointer) -> Double? {
+    func utf8ToDouble(bytes: UnsafePointer<UInt8>, count: Int) -> Double? {
         // Reject unreasonably long or short UTF8 number
-        if work.count <= bytes.count || bytes.count < 1 {
+        if work.count <= count || count < 1 {
             return nil
         }
-
+        // Copy it to the work buffer and null-terminate it
+        let source = UnsafeRawBufferPointer(start: bytes, count: count)
         #if swift(>=4.1)
-          UnsafeMutableRawBufferPointer(work).copyMemory(from: bytes)
+          work.copyMemory(from:source)
         #else
-          UnsafeMutableRawBufferPointer(work).copyBytes(from: bytes)
+          work.copyBytes(from:source)
         #endif
-        work[bytes.count] = 0
+        work[count] = 0
 
         // Use C library strtod() to parse it
-        var e: UnsafeMutablePointer<Int8>? = work.baseAddress
-        let d = strtod(work.baseAddress!, &e)
+        let start = work.baseAddress!.assumingMemoryBound(to: Int8.self)
+        var e: UnsafeMutablePointer<Int8>? = start
+        let d = strtod(start, &e)
 
         // Fail if strtod() did not consume everything we expected
         // or if strtod() thought the number was out of range.
-        if e != work.baseAddress! + bytes.count || !d.isFinite {
+        if e != start + count || !d.isFinite {
             return nil
         }
         return d

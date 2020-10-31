@@ -19,13 +19,13 @@ import Foundation
 
 internal struct BinaryDecoder: Decoder {
     // Current position
-    private var p : UnsafeRawPointer
+    private var p : UnsafePointer<UInt8>
     // Remaining bytes in input.
     private var available : Int
     // Position of start of field currently being parsed
-    private var fieldStartP : UnsafeRawPointer
+    private var fieldStartP : UnsafePointer<UInt8>
     // Position of end of field currently being parsed, nil if we don't know.
-    private var fieldEndP : UnsafeRawPointer?
+    private var fieldEndP : UnsafePointer<UInt8>?
     // Whether or not the field value  has actually been parsed
     private var consumed = true
     // Wire format for last-examined field
@@ -51,7 +51,7 @@ internal struct BinaryDecoder: Decoder {
     private var complete: Bool {return available == 0}
 
     internal init(
-      forReadingFrom pointer: UnsafeRawPointer,
+      forReadingFrom pointer: UnsafePointer<UInt8>,
       count: Int,
       options: BinaryDecodingOptions,
       extensions: ExtensionMap? = nil
@@ -66,7 +66,7 @@ internal struct BinaryDecoder: Decoder {
     }
 
     internal init(
-      forReadingFrom pointer: UnsafeRawPointer,
+      forReadingFrom pointer: UnsafePointer<UInt8>,
       count: Int,
       parent: BinaryDecoder
     ) {
@@ -870,12 +870,16 @@ internal struct BinaryDecoder: Decoder {
             }
             if let extras = extras {
                 let fieldTag = FieldTag(fieldNumber: fieldNumber, wireFormat: .lengthDelimited)
-                let bodySize = extras.reduce(0) { $0 + Varint.encodedSize(of: Int64($1)) }
+                var bodySize = 0
+                for v in extras {
+                    bodySize += Varint.encodedSize(of: Int64(v))
+                }
                 let fieldSize = Varint.encodedSize(of: fieldTag.rawValue) + Varint.encodedSize(of: Int64(bodySize)) + bodySize
                 var field = Data(count: fieldSize)
                 field.withUnsafeMutableBytes { (body: UnsafeMutableRawBufferPointer) in
                   if let baseAddress = body.baseAddress, body.count > 0 {
-                    var encoder = BinaryEncoder(forWritingInto: baseAddress)
+                    let pointer = baseAddress.assumingMemoryBound(to: UInt8.self)
+                    var encoder = BinaryEncoder(forWritingInto: pointer)
                     encoder.startField(tag: fieldTag)
                     encoder.putVarInt(value: Int64(bodySize))
                     for v in extras {
@@ -1205,7 +1209,8 @@ internal struct BinaryDecoder: Decoder {
                     var wasDecoded = false
                     try data.withUnsafeBytes { (body: UnsafeRawBufferPointer) in
                       if let baseAddress = body.baseAddress, body.count > 0 {
-                        var extDecoder = BinaryDecoder(forReadingFrom: baseAddress,
+                        let pointer = baseAddress.assumingMemoryBound(to: UInt8.self)
+                        var extDecoder = BinaryDecoder(forReadingFrom: pointer,
                                                        count: body.count,
                                                        parent: self)
                         // Prime the decode to be correct.
@@ -1248,7 +1253,8 @@ internal struct BinaryDecoder: Decoder {
                         var payload = Data(count: payloadSize)
                         payload.withUnsafeMutableBytes { (body: UnsafeMutableRawBufferPointer) in
                           if let baseAddress = body.baseAddress, body.count > 0 {
-                            var encoder = BinaryEncoder(forWritingInto: baseAddress)
+                            let pointer = baseAddress.assumingMemoryBound(to: UInt8.self)
+                            var encoder = BinaryEncoder(forWritingInto: pointer)
                             encoder.putBytesValue(value: data)
                           }
                         }
@@ -1291,14 +1297,14 @@ internal struct BinaryDecoder: Decoder {
             if available < 1 {
                 throw BinaryDecodingError.truncated
             }
-            var c = p.load(fromByteOffset: 0, as: UInt8.self)
+            var c = p[0]
             while (c & 0x80) != 0 {
                 p += 1
                 available -= 1
                 if available < 1 {
                     throw BinaryDecodingError.truncated
                 }
-                c = p.load(fromByteOffset: 0, as: UInt8.self)
+                c = p[0]
             }
             p += 1
             available -= 1
@@ -1376,7 +1382,7 @@ internal struct BinaryDecoder: Decoder {
         }
         var start = p
         var length = available
-        var c = start.load(fromByteOffset: 0, as: UInt8.self)
+        var c = start[0]
         start += 1
         length -= 1
         if c & 0x80 == 0 {
@@ -1390,7 +1396,7 @@ internal struct BinaryDecoder: Decoder {
             if length < 1 || shift > 63 {
                 throw BinaryDecodingError.malformedProtobuf
             }
-            c = start.load(fromByteOffset: 0, as: UInt8.self)
+            c = start[0]
             start += 1
             length -= 1
             value |= UInt64(c & 0x7f) << shift
@@ -1442,8 +1448,10 @@ internal struct BinaryDecoder: Decoder {
     /// helper handles all four-byte number types.
     private mutating func decodeFourByteNumber<T>(value: inout T) throws {
         guard available >= 4 else {throw BinaryDecodingError.truncated}
-        withUnsafeMutableBytes(of: &value) { dest -> Void in
-            dest.copyMemory(from: UnsafeRawBufferPointer(start: p, count: 4))
+        withUnsafeMutablePointer(to: &value) { ip -> Void in
+            let dest = UnsafeMutableRawPointer(ip).assumingMemoryBound(to: UInt8.self)
+            let src = UnsafeRawPointer(p).assumingMemoryBound(to: UInt8.self)
+            dest.initialize(from: src, count: 4)
         }
         consume(length: 4)
     }
@@ -1452,8 +1460,10 @@ internal struct BinaryDecoder: Decoder {
     /// helper handles all eight-byte number types.
     private mutating func decodeEightByteNumber<T>(value: inout T) throws {
         guard available >= 8 else {throw BinaryDecodingError.truncated}
-        withUnsafeMutableBytes(of: &value) { dest -> Void in
-            dest.copyMemory(from: UnsafeRawBufferPointer(start: p, count: 8))
+        withUnsafeMutablePointer(to: &value) { ip -> Void in
+            let dest = UnsafeMutableRawPointer(ip).assumingMemoryBound(to: UInt8.self)
+            let src = UnsafeRawPointer(p).assumingMemoryBound(to: UInt8.self)
+            dest.initialize(from: src, count: 8)
         }
         consume(length: 8)
     }
@@ -1480,7 +1490,7 @@ internal struct BinaryDecoder: Decoder {
 
     /// Private: Get the start and length for the body of
     // a length-delimited field.
-    private mutating func getFieldBodyBytes(count: inout Int) throws -> UnsafeRawPointer {
+    private mutating func getFieldBodyBytes(count: inout Int) throws -> UnsafePointer<UInt8> {
         let length = try decodeVarint()
         if length <= UInt64(available) {
             count = Int(length)

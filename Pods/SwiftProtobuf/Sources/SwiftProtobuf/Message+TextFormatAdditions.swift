@@ -72,8 +72,9 @@ extension Message {
       if let data = textFormatString.data(using: String.Encoding.utf8) {
         try data.withUnsafeBytes { (body: UnsafeRawBufferPointer) in
           if let baseAddress = body.baseAddress, body.count > 0 {
+            let bytes = baseAddress.assumingMemoryBound(to: UInt8.self)
             var decoder = try TextFormatDecoder(messageType: Self.self,
-                                                utf8Pointer: baseAddress,
+                                                utf8Pointer: bytes,
                                                 count: body.count,
                                                 extensions: extensions)
             try decodeMessage(decoder: &decoder)

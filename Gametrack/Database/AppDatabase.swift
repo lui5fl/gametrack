@@ -38,7 +38,6 @@ final class AppDatabase {
                 t.column("summary", .text)
                 t.column("releaseDate", .date)
                 t.column("timestamp", .integer)
-                t.column("popularity", .double)
                 t.column("rating", .double)
                 t.column("coverURLString", .text)
                 t.column("platforms", .text)

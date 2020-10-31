@@ -40,30 +40,13 @@ private func toJsonFieldName(_ s: String) -> String {
 /// string data.  Track the buffers and release all of those buffers
 /// in case we ever get deallocated.
 fileprivate class InternPool {
-  private var interned = [UnsafeRawBufferPointer]()
+  private var interned = [UnsafeBufferPointer<UInt8>]()
 
-  func intern(utf8: String.UTF8View) -> UnsafeRawBufferPointer {
-    #if swift(>=4.1)
-    let mutable = UnsafeMutableRawBufferPointer.allocate(byteCount: utf8.count,
-                                                         alignment: MemoryLayout<UInt8>.alignment)
-    #else
-    let mutable = UnsafeMutableRawBufferPointer.allocate(count: utf8.count)
-    #endif
-    mutable.copyBytes(from: utf8)
-    let immutable = UnsafeRawBufferPointer(mutable)
-    interned.append(immutable)
-    return immutable
-  }
-
-  func intern(utf8Ptr: UnsafeBufferPointer<UInt8>) -> UnsafeRawBufferPointer {
-    #if swift(>=4.1)
-    let mutable = UnsafeMutableRawBufferPointer.allocate(byteCount: utf8Ptr.count,
-                                                         alignment: MemoryLayout<UInt8>.alignment)
-    #else
-    let mutable = UnsafeMutableRawBufferPointer.allocate(count: utf8.count)
-    #endif
-    mutable.copyBytes(from: utf8Ptr)
-    let immutable = UnsafeRawBufferPointer(mutable)
+  func intern(utf8: String.UTF8View) -> UnsafeBufferPointer<UInt8> {
+    let bytePointer = UnsafeMutablePointer<UInt8>.allocate(capacity: utf8.count)
+    let mutable = UnsafeMutableBufferPointer<UInt8>(start: bytePointer, count: utf8.count)
+    _ = mutable.initialize(from: utf8)
+    let immutable = UnsafeBufferPointer<UInt8>(start: bytePointer, count: utf8.count)
     interned.append(immutable)
     return immutable
   }
@@ -104,17 +87,10 @@ public struct _NameMap: ExpressibleByDictionaryLiteral {
   /// has to be computed, it caches the UTF-8 bytes in an
   /// unmovable and immutable heap area.
   internal struct Name: Hashable, CustomStringConvertible {
-    // This should not be used outside of this file, as it requires
-    // coordinating the lifecycle with the lifecycle of the pool
-    // where the raw UTF8 gets interned.
-    fileprivate init(staticString: StaticString, pool: InternPool) {
+    // This is safe to use elsewhere in this library
+    internal init(staticString: StaticString) {
         self.nameString = .staticString(staticString)
-        if staticString.hasPointerRepresentation {
-            self.utf8Buffer = UnsafeRawBufferPointer(start: staticString.utf8Start,
-                                                     count: staticString.utf8CodeUnitCount)
-        } else {
-            self.utf8Buffer = staticString.withUTF8Buffer { pool.intern(utf8Ptr: $0) }
-        }
+        self.utf8Buffer = UnsafeBufferPointer<UInt8>(start: staticString.utf8Start, count: staticString.utf8CodeUnitCount)
     }
 
     // This should not be used outside of this file, as it requires
@@ -128,12 +104,12 @@ public struct _NameMap: ExpressibleByDictionaryLiteral {
 
     // This is for building a transient `Name` object sufficient for lookup purposes.
     // It MUST NOT be exposed outside of this file.
-    fileprivate init(transientUtf8Buffer: UnsafeRawBufferPointer) {
+    fileprivate init(transientUtf8Buffer: UnsafeBufferPointer<UInt8>) {
         self.nameString = .staticString("")
         self.utf8Buffer = transientUtf8Buffer
     }
 
-    private(set) var utf8Buffer: UnsafeRawBufferPointer
+    private(set) var utf8Buffer: UnsafeBufferPointer<UInt8>
 
     private enum NameString {
       case string(String)
@@ -222,14 +198,14 @@ public struct _NameMap: ExpressibleByDictionaryLiteral {
       switch description {
 
       case .same(proto: let p):
-        let protoName = Name(staticString: p, pool: internPool)
+        let protoName = Name(staticString: p)
         let names = Names(json: protoName, proto: protoName)
         numberToNameMap[number] = names
         protoToNumberMap[protoName] = number
         jsonToNumberMap[protoName] = number
 
       case .standard(proto: let p):
-        let protoName = Name(staticString: p, pool: internPool)
+        let protoName = Name(staticString: p)
         let jsonString = toJsonFieldName(protoName.description)
         let jsonName = Name(string: jsonString, pool: internPool)
         let names = Names(json: jsonName, proto: protoName)
@@ -239,8 +215,8 @@ public struct _NameMap: ExpressibleByDictionaryLiteral {
         jsonToNumberMap[jsonName] = number
 
       case .unique(proto: let p, json: let j):
-        let jsonName = Name(staticString: j, pool: internPool)
-        let protoName = Name(staticString: p, pool: internPool)
+        let jsonName = Name(staticString: j)
+        let protoName = Name(staticString: p)
         let names = Names(json: jsonName, proto: protoName)
         numberToNameMap[number] = names
         protoToNumberMap[protoName] = number
@@ -248,13 +224,13 @@ public struct _NameMap: ExpressibleByDictionaryLiteral {
         jsonToNumberMap[jsonName] = number
 
       case .aliased(proto: let p, aliases: let aliases):
-        let protoName = Name(staticString: p, pool: internPool)
+        let protoName = Name(staticString: p)
         let names = Names(json: protoName, proto: protoName)
         numberToNameMap[number] = names
         protoToNumberMap[protoName] = number
         jsonToNumberMap[protoName] = number
         for alias in aliases {
-            let protoName = Name(staticString: alias, pool: internPool)
+            let protoName = Name(staticString: alias)
             protoToNumberMap[protoName] = number
             jsonToNumberMap[protoName] = number
         }
@@ -273,7 +249,7 @@ public struct _NameMap: ExpressibleByDictionaryLiteral {
   ///
   /// This is used by the Text format parser to look up field or enum
   /// names using a direct reference to the un-decoded UTF8 bytes.
-  internal func number(forProtoName raw: UnsafeRawBufferPointer) -> Int? {
+  internal func number(forProtoName raw: UnsafeBufferPointer<UInt8>) -> Int? {
     let n = Name(transientUtf8Buffer: raw)
     return protoToNumberMap[n]
   }
@@ -290,7 +266,7 @@ public struct _NameMap: ExpressibleByDictionaryLiteral {
   /// original proto/text name.
   internal func number(forJSONName name: String) -> Int? {
     let utf8 = Array(name.utf8)
-    return utf8.withUnsafeBytes { (buffer: UnsafeRawBufferPointer) in
+    return utf8.withUnsafeBufferPointer { (buffer: UnsafeBufferPointer<UInt8>) in
       let n = Name(transientUtf8Buffer: buffer)
       return jsonToNumberMap[n]
     }
@@ -303,7 +279,7 @@ public struct _NameMap: ExpressibleByDictionaryLiteral {
   /// required no special processing.  As a result, we can avoid
   /// copying the name and look up the number using a direct reference
   /// to the un-decoded UTF8 bytes.
-  internal func number(forJSONName raw: UnsafeRawBufferPointer) -> Int? {
+  internal func number(forJSONName raw: UnsafeBufferPointer<UInt8>) -> Int? {
     let n = Name(transientUtf8Buffer: raw)
     return jsonToNumberMap[n]
   }

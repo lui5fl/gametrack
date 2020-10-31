@@ -145,7 +145,6 @@ internal struct HashVisitor: Visitor {
   }
 
   mutating func visitRepeatedFloatField(value: [Float], fieldNumber: Int) throws {
-    assert(!value.isEmpty)
     #if swift(>=4.2)
       hasher.combine(fieldNumber)
       hasher.combine(value)
@@ -158,7 +157,6 @@ internal struct HashVisitor: Visitor {
   }
 
   mutating func visitRepeatedDoubleField(value: [Double], fieldNumber: Int) throws {
-    assert(!value.isEmpty)
     #if swift(>=4.2)
       hasher.combine(fieldNumber)
       hasher.combine(value)
@@ -171,7 +169,6 @@ internal struct HashVisitor: Visitor {
   }
 
   mutating func visitRepeatedInt32Field(value: [Int32], fieldNumber: Int) throws {
-    assert(!value.isEmpty)
     #if swift(>=4.2)
       hasher.combine(fieldNumber)
       hasher.combine(value)
@@ -184,7 +181,6 @@ internal struct HashVisitor: Visitor {
   }
 
   mutating func visitRepeatedInt64Field(value: [Int64], fieldNumber: Int) throws {
-    assert(!value.isEmpty)
     #if swift(>=4.2)
       hasher.combine(fieldNumber)
       hasher.combine(value)
@@ -197,7 +193,6 @@ internal struct HashVisitor: Visitor {
   }
 
   mutating func visitRepeatedUInt32Field(value: [UInt32], fieldNumber: Int) throws {
-    assert(!value.isEmpty)
     #if swift(>=4.2)
       hasher.combine(fieldNumber)
       hasher.combine(value)
@@ -210,7 +205,6 @@ internal struct HashVisitor: Visitor {
   }
 
   mutating func visitRepeatedUInt64Field(value: [UInt64], fieldNumber: Int) throws {
-    assert(!value.isEmpty)
     #if swift(>=4.2)
       hasher.combine(fieldNumber)
       hasher.combine(value)
@@ -223,7 +217,6 @@ internal struct HashVisitor: Visitor {
   }
 
   mutating func visitRepeatedSInt32Field(value: [Int32], fieldNumber: Int) throws {
-    assert(!value.isEmpty)
     #if swift(>=4.2)
       hasher.combine(fieldNumber)
       hasher.combine(value)
@@ -236,7 +229,6 @@ internal struct HashVisitor: Visitor {
   }
 
   mutating func visitRepeatedSInt64Field(value: [Int64], fieldNumber: Int) throws {
-    assert(!value.isEmpty)
     #if swift(>=4.2)
       hasher.combine(fieldNumber)
       hasher.combine(value)
@@ -249,7 +241,6 @@ internal struct HashVisitor: Visitor {
   }
 
   mutating func visitRepeatedFixed32Field(value: [UInt32], fieldNumber: Int) throws {
-    assert(!value.isEmpty)
     #if swift(>=4.2)
       hasher.combine(fieldNumber)
       hasher.combine(value)
@@ -262,7 +253,6 @@ internal struct HashVisitor: Visitor {
   }
 
   mutating func visitRepeatedFixed64Field(value: [UInt64], fieldNumber: Int) throws {
-    assert(!value.isEmpty)
     #if swift(>=4.2)
       hasher.combine(fieldNumber)
       hasher.combine(value)
@@ -275,7 +265,6 @@ internal struct HashVisitor: Visitor {
   }
 
   mutating func visitRepeatedSFixed32Field(value: [Int32], fieldNumber: Int) throws {
-    assert(!value.isEmpty)
     #if swift(>=4.2)
       hasher.combine(fieldNumber)
       hasher.combine(value)
@@ -288,7 +277,6 @@ internal struct HashVisitor: Visitor {
   }
 
   mutating func visitRepeatedSFixed64Field(value: [Int64], fieldNumber: Int) throws {
-    assert(!value.isEmpty)
     #if swift(>=4.2)
       hasher.combine(fieldNumber)
       hasher.combine(value)
@@ -301,7 +289,6 @@ internal struct HashVisitor: Visitor {
   }
 
   mutating func visitRepeatedBoolField(value: [Bool], fieldNumber: Int) throws {
-    assert(!value.isEmpty)
     #if swift(>=4.2)
       hasher.combine(fieldNumber)
       hasher.combine(value)
@@ -314,7 +301,6 @@ internal struct HashVisitor: Visitor {
   }
 
   mutating func visitRepeatedStringField(value: [String], fieldNumber: Int) throws {
-    assert(!value.isEmpty)
     #if swift(>=4.2)
       hasher.combine(fieldNumber)
       hasher.combine(value)
@@ -327,7 +313,6 @@ internal struct HashVisitor: Visitor {
   }
 
   mutating func visitRepeatedBytesField(value: [Data], fieldNumber: Int) throws {
-    assert(!value.isEmpty)
     #if swift(>=4.2)
       hasher.combine(fieldNumber)
       hasher.combine(value)
@@ -340,7 +325,6 @@ internal struct HashVisitor: Visitor {
   }
 
   mutating func visitRepeatedEnumField<E: Enum>(value: [E], fieldNumber: Int) throws {
-    assert(!value.isEmpty)
     #if swift(>=4.2)
       hasher.combine(fieldNumber)
       hasher.combine(value)
@@ -353,7 +337,6 @@ internal struct HashVisitor: Visitor {
   }
 
   mutating func visitRepeatedMessageField<M: Message>(value: [M], fieldNumber: Int) throws {
-    assert(!value.isEmpty)
     #if swift(>=4.2)
       hasher.combine(fieldNumber)
       for v in value {
@@ -368,7 +351,6 @@ internal struct HashVisitor: Visitor {
   }
 
   mutating func visitRepeatedGroupField<G: Message>(value: [G], fieldNumber: Int) throws {
-    assert(!value.isEmpty)
     #if swift(>=4.2)
       hasher.combine(fieldNumber)
       for v in value {

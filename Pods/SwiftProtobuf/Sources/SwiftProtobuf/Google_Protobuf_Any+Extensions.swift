@@ -68,9 +68,11 @@ extension Google_Protobuf_Any {
       if let data = textFormatString.data(using: String.Encoding.utf8) {
         try data.withUnsafeBytes { (body: UnsafeRawBufferPointer) in
           if let baseAddress = body.baseAddress, body.count > 0 {
+            let bytes = baseAddress.assumingMemoryBound(to: UInt8.self)
+
             var textDecoder = try TextFormatDecoder(
               messageType: Google_Protobuf_Any.self,
-              utf8Pointer: baseAddress,
+              utf8Pointer: bytes,
               count: body.count,
               extensions: extensions)
             try decodeTextFormat(decoder: &textDecoder)

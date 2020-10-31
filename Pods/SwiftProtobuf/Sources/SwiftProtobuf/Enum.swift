@@ -83,7 +83,7 @@ extension Enum {
   /// to distinguish them.
   ///
   /// - Parameter name: Buffer holding the UTF-8 bytes of the desired name.
-  internal init?(rawUTF8: UnsafeRawBufferPointer) {
+  internal init?(rawUTF8: UnsafeBufferPointer<UInt8>) {
     guard let nameProviding = Self.self as? _ProtoNameProviding.Type,
       let number = nameProviding._protobuf_nameMap.number(forJSONName: rawUTF8) else {
       return nil

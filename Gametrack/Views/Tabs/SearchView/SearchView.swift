@@ -45,6 +45,7 @@ struct SearchView: View {
                         List(searchList.games) { game in
                             SearchViewRow(viewModel: self.viewModel, game: game)
                         }
+                        .listStyle(PlainListStyle())
                     } else {
                         Spacer()
                     }

@@ -19,7 +19,6 @@ internal struct JSONEncodingVisitor: Visitor {
 
   private var encoder = JSONEncoder()
   private var nameMap: _NameMap
-  private var extensions: ExtensionFieldValueSet?
   private let options: JSONEncodingOptions
 
   /// The JSON text produced by the visitor, as raw UTF8 bytes.
@@ -43,6 +42,16 @@ internal struct JSONEncodingVisitor: Visitor {
     self.options = options
   }
 
+  /// Creates a new visitor that serializes the given message to JSON format.
+  init(message: Message, options: JSONEncodingOptions) throws {
+    if let nameProviding = message as? _ProtoNameProviding {
+      self.nameMap = type(of: nameProviding)._protobuf_nameMap
+    } else {
+      throw JSONEncodingError.missingFieldNames
+    }
+    self.options = options
+  }
+
   mutating func startArray() {
     encoder.startArray()
   }
@@ -51,14 +60,8 @@ internal struct JSONEncodingVisitor: Visitor {
     encoder.endArray()
   }
 
-  mutating func startObject(message: Message) {
-    self.extensions = (message as? ExtensibleMessage)?._protobuf_extensionFieldValues
+  mutating func startObject() {
     encoder.startObject()
-  }
-
-  mutating func startArrayObject(message: Message) {
-    self.extensions = (message as? ExtensibleMessage)?._protobuf_extensionFieldValues
-    encoder.startArrayObject()
   }
 
   mutating func endObject() {
@@ -139,7 +142,6 @@ internal struct JSONEncodingVisitor: Visitor {
     fieldNumber: Int,
     encode: (inout JSONEncoder, T) throws -> ()
   ) throws {
-    assert(!value.isEmpty)
     try startField(for: fieldNumber)
     var comma = false
     encoder.startArray()
@@ -164,25 +166,8 @@ internal struct JSONEncodingVisitor: Visitor {
 
   mutating func visitSingularMessageField<M: Message>(value: M, fieldNumber: Int) throws {
     try startField(for: fieldNumber)
-    if let m = value as? _CustomJSONCodable {
-      let json = try m.encodedJSONString(options: options)
-      encoder.append(text: json)
-    } else if let newNameMap = (M.self as? _ProtoNameProviding.Type)?._protobuf_nameMap {
-      // Preserve outer object's name and extension maps; restore them before returning
-      let oldNameMap = self.nameMap
-      let oldExtensions = self.extensions
-      defer {
-        self.nameMap = oldNameMap
-        self.extensions = oldExtensions
-      }
-      // Install inner object's name and extension maps
-      self.nameMap = newNameMap
-      startObject(message: value)
-      try value.traverse(visitor: &self)
-      endObject()
-    } else {
-      throw JSONEncodingError.missingFieldNames
-    }
+    let json = try value.jsonUTF8Data(options: options)
+    encoder.append(utf8Data: json)
   }
 
   mutating func visitSingularGroupField<G: Message>(value: G, fieldNumber: Int) throws {
@@ -289,42 +274,15 @@ internal struct JSONEncodingVisitor: Visitor {
   }
 
   mutating func visitRepeatedMessageField<M: Message>(value: [M], fieldNumber: Int) throws {
-    assert(!value.isEmpty)
-    try startField(for: fieldNumber)
-    var comma = false
-    encoder.startArray()
-    if let _ = M.self as? _CustomJSONCodable.Type {
-      for v in value {
-        if comma {
-          encoder.comma()
-        }
-        comma = true
-        let json = try v.jsonString(options: options)
-        encoder.append(text: json)
-      }
-    } else if let newNameMap = (M.self as? _ProtoNameProviding.Type)?._protobuf_nameMap {
-      // Preserve name and extension maps for outer object
-      let oldNameMap = self.nameMap
-      let oldExtensions = self.extensions
-      // Restore outer object's name and extension maps before returning
-      defer {
-        self.nameMap = oldNameMap
-        self.extensions = oldExtensions
-      }
-      self.nameMap = newNameMap
-      for v in value {
-        startArrayObject(message: v)
-        try v.traverse(visitor: &self)
-        encoder.endObject()
-      }
-    } else {
-      throw JSONEncodingError.missingFieldNames
+    let localOptions = options
+    try _visitRepeated(value: value, fieldNumber: fieldNumber) {
+      (encoder: inout JSONEncoder, v: M) throws in
+      let json = try v.jsonUTF8Data(options: localOptions)
+      encoder.append(utf8Data: json)
     }
-    encoder.endArray()
   }
 
   mutating func visitRepeatedGroupField<G: Message>(value: [G], fieldNumber: Int) throws {
-    assert(!value.isEmpty)
     // Google does not serialize groups into JSON
   }
 
@@ -369,6 +327,11 @@ internal struct JSONEncodingVisitor: Visitor {
     encoder.append(text: "}")
   }
 
+  /// Called for each extension range.
+  mutating func visitExtensionFields(fields: ExtensionFieldValueSet, start: Int, end: Int) throws {
+    // JSON does not store extensions
+  }
+
   /// Helper function that throws an error if the field number could not be
   /// resolved.
   private mutating func startField(for number: Int) throws {
@@ -380,10 +343,8 @@ internal struct JSONEncodingVisitor: Visitor {
         name = nameMap.names(for: number)?.json
     }
 
-    if let name = name {
-        encoder.startField(name: name)
-    } else if let name = extensions?[number]?.protobufExtension.fieldName {
-        encoder.startExtensionField(name: name)
+    if let nm = name {
+        encoder.startField(name: nm)
     } else {
         throw JSONEncodingError.missingFieldNames
     }

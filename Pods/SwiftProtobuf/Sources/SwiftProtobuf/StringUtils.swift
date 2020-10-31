@@ -22,9 +22,9 @@ import Foundation
 
 // Wrapper that takes a buffer and start/end offsets
 internal func utf8ToString(
-  bytes: UnsafeRawBufferPointer,
-  start: UnsafeRawBufferPointer.Index,
-  end: UnsafeRawBufferPointer.Index
+  bytes: UnsafeBufferPointer<UInt8>,
+  start: UnsafeBufferPointer<UInt8>.Index,
+  end: UnsafeBufferPointer<UInt8>.Index
 ) -> String? {
   return utf8ToString(bytes: bytes.baseAddress! + start, count: end - start)
 }
@@ -45,11 +45,11 @@ internal func utf8ToString(
 // On Linux, the Foundation initializer is much
 // slower than on macOS, so this is a much bigger
 // win there.
-internal func utf8ToString(bytes: UnsafeRawPointer, count: Int) -> String? {
+internal func utf8ToString(bytes: UnsafePointer<UInt8>, count: Int) -> String? {
   if count == 0 {
     return String()
   }
-  let codeUnits = UnsafeRawBufferPointer(start: bytes, count: count)
+  let codeUnits = UnsafeBufferPointer<UInt8>(start: bytes, count: count)
   let sourceEncoding = Unicode.UTF8.self
 
   // Verify that the UTF-8 is valid.

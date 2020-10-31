@@ -29,7 +29,6 @@ private let asciiNewline = UInt8(ascii: "\n")
 private let asciiUpperA = UInt8(ascii: "A")
 
 private let tabSize = 2
-private let tab = [UInt8](repeating: asciiSpace, count: tabSize)
 
 /// TextFormatEncoder has no public members.
 internal struct TextFormatEncoder {
@@ -50,10 +49,6 @@ internal struct TextFormatEncoder {
         data.append(contentsOf: name.utf8Buffer)
     }
 
-    internal mutating func append(bytes: [UInt8]) {
-        data.append(contentsOf: bytes)
-    }
-
     private mutating func append(text: String) {
         data.append(contentsOf: text.utf8)
     }
@@ -64,19 +59,14 @@ internal struct TextFormatEncoder {
         data.append(contentsOf: indentString)
     }
 
-    mutating func emitFieldName(name: UnsafeRawBufferPointer) {
+    mutating func emitFieldName(name: UnsafeBufferPointer<UInt8>) {
         indent()
         data.append(contentsOf: name)
     }
 
     mutating func emitFieldName(name: StaticString) {
-        let buff = UnsafeRawBufferPointer(start: name.utf8Start, count: name.utf8CodeUnitCount)
+        let buff = UnsafeBufferPointer(start: name.utf8Start, count: name.utf8CodeUnitCount)
         emitFieldName(name: buff)
-    }
-
-    mutating func emitFieldName(name: [UInt8]) {
-        indent()
-        data.append(contentsOf: name)
     }
 
     mutating func emitExtensionFieldName(name: String) {
@@ -103,11 +93,15 @@ internal struct TextFormatEncoder {
     //    name_of_field {key: value key2: value2}
     mutating func startMessageField() {
         append(staticText: " {\n")
-        indentString.append(contentsOf: tab)
+        for _ in 1...tabSize {
+            indentString.append(asciiSpace)
+        }
     }
 
     mutating func endMessageField() {
-        indentString.removeLast(tabSize)
+        for _ in 1...tabSize {
+            indentString.remove(at: indentString.count - 1)
+        }
         indent()
         append(staticText: "}\n")
     }
@@ -258,7 +252,9 @@ internal struct TextFormatEncoder {
     mutating func putBytesValue(value: Data) {
         data.append(asciiDoubleQuote)
         value.withUnsafeBytes { (body: UnsafeRawBufferPointer) in
-          if let p = body.baseAddress, body.count > 0 {
+          if let baseAddress = body.baseAddress, body.count > 0 {
+            let p = baseAddress.assumingMemoryBound(to: UInt8.self)
+
             for i in 0..<body.count {
               let c = p[i]
               switch c {

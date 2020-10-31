@@ -16,7 +16,6 @@ struct SearchResult {
     var summary: String
     var releaseDate: Date
     var timestamp: Int64
-    var popularity: Double
     var rating: Double
     var coverURLString: String
     var platforms: String
