@@ -7,9 +7,9 @@ Gametrack is an iPhone app for tracking your progress in videogames. I've starte
 ## Before building the app
 Follow the next steps to successfully build and run the app:
 
-1. Request your own token to get data from the IGDB API [here](https://api.igdb.com)
+1. Go to the IGDB API Docs and do what the [Account Creation](https://api-docs.igdb.com/#account-creation) and [Authentication](https://api-docs.igdb.com/#authentication) sections say. Take note of your Client ID and your Access Token: ideally you'd input your Client Secret inside the app so it can automatically request a new Access Token every time it expires, but this hasn't been implemented yet
 2. Open ```Gametrack.xcworkspace```
-3. Create a ```Key.plist``` file in the root of the project and add a row whose key is "apiKey" and whose value is the token you requested before
+3. Create a ```Key.plist``` file in the root of the project and add two rows, "clientId" and "accessToken", whose values will respectively be your Client ID and your Access Token (to no one's surprise!)
 4. You're all set!
 
 ## Dependencies (pods)
