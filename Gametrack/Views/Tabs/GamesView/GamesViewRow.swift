@@ -25,9 +25,9 @@ struct GamesViewRow: View {
     
     var body: some View {
         
-        HStack(alignment: .top, spacing: 20.0) {
+        HStack(alignment: .top, spacing: 20) {
             
-            // Cover art
+            // 1st column: cover art
             if (imageLoader.image != nil) {
                 Image(uiImage: self.imageLoader.image!)
                     .resizable()
@@ -46,36 +46,28 @@ struct GamesViewRow: View {
                 }
             }
             
-            // Info
-            VStack(alignment: .leading) {
+            // 2nd column: info
+            VStack(alignment: .leading, spacing: 7) {
                 
-                // Platform
                 if game.platformsArray.count > 0 {
                     Text((game.platformsArray.count > 1 ? "Multi-platform" : game.platformsArray[0]).uppercased()).font(.system(size: 13.0))
                         .fontWeight(.semibold)
                         .foregroundColor(.secondary)
-                        .padding(.bottom, 5)
                 }
                 
-                
-                // Title
                 Text(game.name)
-                    .fontWeight(.heavy)
                     .font(.system(size: 19.0))
+                    .fontWeight(.heavy)
                     .lineLimit(nil)
                 
-                // Company
                 if !game.company.isEmpty {
                     Text(game.company)
-                        .font(.system(size: 15.0))
-                        .padding(.top, 5)
+                        .font(.system(size: 13.0))
                         .lineLimit(nil)
                 }
                     
-                // Release year
                 if !game.releaseYearText.isEmpty && game.timestamp > 0 {
-                    Text(game.releaseYearText).font(.system(size: 15.0)).foregroundColor(.secondary)
-                    .padding(.top, 5)
+                    Text(game.releaseYearText).font(.system(size: 13.0)).foregroundColor(.secondary)
                 }
                 
             }
@@ -84,6 +76,7 @@ struct GamesViewRow: View {
             Divider()
             
             // "Complete" button
+            // TODO: replace with swipe gesture
             VStack {
                 Spacer()
                 Image(systemName: "checkmark.circle")
@@ -91,13 +84,12 @@ struct GamesViewRow: View {
                     .foregroundColor(.secondary)
                 Spacer()
             }
-            .padding(.trailing, 5.0)
             .onTapGesture {
                 try! self.viewModel.completeGame(id: self.game.id!)
             }
             
         }
-        .padding(.vertical, 10)
+        .padding(.vertical, 15)
         
     }
     

@@ -24,7 +24,7 @@ final class AppDatabase {
         
         #if DEBUG
         // https://github.com/groue/GRDB.swift/blob/master/Documentation/Migrations.md#the-erasedatabaseonschemachange-option
-        migrator.eraseDatabaseOnSchemaChange = true
+        // migrator.eraseDatabaseOnSchemaChange = true
         #endif
 
         // Create Game model
@@ -44,6 +44,7 @@ final class AppDatabase {
                 t.column("company", .text)
                 t.column("completed", .boolean)
                 t.column("completionDate", .date)
+                t.column("pinned", .boolean).defaults(to: false)
             }
             
         }
@@ -60,21 +61,21 @@ extension AppDatabase {
     
     // MARK: Writes
     
-    /// Save (insert or update) a game
+    /// Save (insert or update) a game.
     func saveGame(_ game: inout Game) throws {
         try dbQueue.write { db in
             try game.save(db)
         }
     }
     
-    /// Delete certain games
+    /// Delete certain games.
     func deleteGames(ids: [Int64]) throws {
         try dbQueue.write { db in
             _ = try Game.deleteAll(db, keys: ids)
         }
     }
     
-    /// Delete all games
+    /// Delete all games.
     func deleteAllGames() throws {
         try dbQueue.write { db in
             _ = try Game.deleteAll(db)
@@ -83,7 +84,7 @@ extension AppDatabase {
     
     // MARK: Reads
     
-    /// Return all games ordered by name
+    /// Return all games ordered by name.
     func gamesOrderedByName() -> AnyPublisher<[Game], Error> {
         ValueObservation
             .tracking(Game.all().orderedByName().fetchAll)
@@ -91,7 +92,7 @@ extension AppDatabase {
             .eraseToAnyPublisher()
     }
     
-    /// Return all games ordered by completion date
+    /// Return all games ordered by completion date.
     func gamesOrderedByCompletionDate() -> AnyPublisher<[Game], Error> {
         ValueObservation
             .tracking(Game.all().orderedByCompletionDate().fetchAll)

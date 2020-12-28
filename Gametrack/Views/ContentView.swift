@@ -18,29 +18,26 @@ struct ContentView: View {
             
             /// Games Tab: list all added games
             GamesView(viewModel: viewModel.gamesViewModel).tabItem({
-                Image(systemName: "gamecontroller").font(.system(size: 20.0, weight: .semibold, design: .default))
-                Text("")
+                Image(systemName: "gamecontroller")
             })
             
             /// Completed Tab: list all completed games
             CompletedView(viewModel: viewModel.completedViewModel).tabItem({
-                Image(systemName: "checkmark").font(.system(size: 20.0, weight: .semibold, design: .default))
-                Text("")
+                Image(systemName: "checkmark")
             })
             
             /// Search Tab: search for a game on IGDB
             SearchView(viewModel: viewModel.searchViewModel).tabItem({
-                Image(systemName: "magnifyingglass").font(.system(size: 20.0, weight: .semibold, design: .default))
-                Text("")
+                Image(systemName: "magnifyingglass")
             })
             
             /// Settings Tab
             SettingsView(viewModel: viewModel.settingsViewModel).tabItem({
-                Image(systemName: "gear").font(.system(size: 20.0, weight: .semibold, design: .default))
-                Text("")
+                Image(systemName: "gear")
             })
             
         }
+        .font(.system(size: 20.0, weight: .semibold, design: .default))
         .accentColor(.purple)
         
     }

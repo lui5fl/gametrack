@@ -13,13 +13,14 @@ class SearchList: ObservableObject {
     @Published var games: [SearchResult] = []
     @Published var isLoading = false
     
-    var searchService = SearchStore.shared
-    
-    func reload(name: String) {
+    /// Reload list of search results.
+    ///
+    /// - Parameter query: text to search in the games database.
+    func reload(query: String) {
         self.games = []
         self.isLoading = true
         
-        searchService.searchGame(name: name) { [weak self]  (result) in
+        SearchStore.shared.searchGame(name: query) { [weak self]  (result) in
             self?.isLoading = false
             switch result {
             case .success(let games): self?.games = games

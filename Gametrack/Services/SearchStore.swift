@@ -15,9 +15,9 @@ let keyFileExtension = "plist"
 
 class SearchStore: SearchService {
     
-    static let shared = SearchStore()
-    
+    // Singleton
     private init() {}
+    static let shared = SearchStore()
     
     // Instantiate IGDBWrapper class for making requests to IGDB's REST API
     lazy var iGDB: IGDBWrapper = {
