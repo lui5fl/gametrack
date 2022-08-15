@@ -22,7 +22,7 @@ struct SearchView: View {
         }, set: {
             self.searchText = $0
             if !self.searchText.isEmpty {
-                self.searchList.reload(name: self.searchText)
+                self.searchList.reload(query: self.searchText)
             }
         })
         

@@ -11,6 +11,8 @@ import GRDB
 
 struct Game: Identifiable {
     
+    // MARK: Properties
+    
     var id: Int64?
     var gameId: Int
     var name: String
@@ -25,45 +27,36 @@ struct Game: Identifiable {
     var completed: Bool = false
     var completionDate: Date = Date()
     
-    static let dateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "dd/MM/YYYY HH:mm"
-        return formatter
-    }()
-    
-    static let dateFormatterYear: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "YYYY"
-        return formatter
-    }()
+    // MARK: Computed properties
     
     var releaseDateText: String {
-        return Game.dateFormatter.string(from: releaseDate)
+        DateFormatter.shared.dateAndTime.string(from: releaseDate)
     }
     
     var releaseYearText: String {
-        return Game.dateFormatterYear.string(from: releaseDate)
+        DateFormatter.shared.year.string(from: releaseDate)
     }
     
     var coverURL: URL? {
-        return URL(string: coverURLString)
+        URL(string: coverURLString)
     }
     
     var platformsArray: [String] {
-        return platforms.components(separatedBy: ";")
+        platforms.components(separatedBy: ";")
     }
     
     var completionDateText: String {
-        return Game.dateFormatter.string(from: completionDate)
+        DateFormatter.shared.dateAndTime.string(from: completionDate)
     }
     
 }
+
+// MARK: - Game
 
 extension Game: Codable, FetchableRecord, MutablePersistableRecord {
 
     fileprivate enum Columns {
         static let name = Column(CodingKeys.name)
-        static let company = Column(CodingKeys.company)
         static let completionDate = Column(CodingKeys.completionDate)
     }
     
@@ -72,6 +65,8 @@ extension Game: Codable, FetchableRecord, MutablePersistableRecord {
     }
     
 }
+
+// MARK: - DerivableRequest
 
 extension DerivableRequest where RowDecoder == Game {
     

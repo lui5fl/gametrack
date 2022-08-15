@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		8C5D5E4F254DDFD3000247A8 /* Key.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8C5D5E4E254DDFD3000247A8 /* Key.plist */; };
+		8C818B4A258E5F4C0056BF0C /* DateFormatter+Gametrack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C818B49258E5F4C0056BF0C /* DateFormatter+Gametrack.swift */; };
+		8CF05AEB2599D7D600E1AAF7 /* Text+Gametrack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CF05AEA2599D7D600E1AAF7 /* Text+Gametrack.swift */; };
 		D3BF9B7AC05D5053BBB3DED4 /* Pods_Gametrack.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 466543838A8F5EAB8F7619C0 /* Pods_Gametrack.framework */; };
 		E63571B324B732BC00831C9B /* CompletedViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E63571B224B732BC00831C9B /* CompletedViewModel.swift */; };
 		E63571B524B7336900831C9B /* CompletedViewRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = E63571B424B7336900831C9B /* CompletedViewRow.swift */; };
@@ -43,6 +45,8 @@
 		466543838A8F5EAB8F7619C0 /* Pods_Gametrack.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Gametrack.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		585D753C6F4A9F87D6C03641 /* Pods-Gametrack.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Gametrack.debug.xcconfig"; path = "Target Support Files/Pods-Gametrack/Pods-Gametrack.debug.xcconfig"; sourceTree = "<group>"; };
 		8C5D5E4E254DDFD3000247A8 /* Key.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Key.plist; sourceTree = "<group>"; };
+		8C818B49258E5F4C0056BF0C /* DateFormatter+Gametrack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DateFormatter+Gametrack.swift"; sourceTree = "<group>"; };
+		8CF05AEA2599D7D600E1AAF7 /* Text+Gametrack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Text+Gametrack.swift"; sourceTree = "<group>"; };
 		B0BEFE4FF9761C159BA3C806 /* Pods-Gametrack.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Gametrack.release.xcconfig"; path = "Target Support Files/Pods-Gametrack/Pods-Gametrack.release.xcconfig"; sourceTree = "<group>"; };
 		E63571B224B732BC00831C9B /* CompletedViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompletedViewModel.swift; sourceTree = "<group>"; };
 		E63571B424B7336900831C9B /* CompletedViewRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompletedViewRow.swift; sourceTree = "<group>"; };
@@ -94,6 +98,32 @@
 				466543838A8F5EAB8F7619C0 /* Pods_Gametrack.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		8C818B48258E5F1C0056BF0C /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				8C818B49258E5F4C0056BF0C /* DateFormatter+Gametrack.swift */,
+				8CF05AEA2599D7D600E1AAF7 /* Text+Gametrack.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		8C818B4D258E60070056BF0C /* Assets */ = {
+			isa = PBXGroup;
+			children = (
+				E6A18A1824B4E344004A3BC2 /* Assets.xcassets */,
+				8C818B4F258E62FC0056BF0C /* Preview Content */,
+			);
+			path = Assets;
+			sourceTree = "<group>";
+		};
+		8C818B4F258E62FC0056BF0C /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				E6A18A1B24B4E344004A3BC2 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
 			sourceTree = "<group>";
 		};
 		E65B2B6824B4E5DB00019D72 /* Models */ = {
@@ -158,28 +188,20 @@
 			isa = PBXGroup;
 			children = (
 				E6E0A15E24B619E200BAFA45 /* World.swift */,
-				E6A18A1824B4E344004A3BC2 /* Assets.xcassets */,
 				E6A18A1D24B4E344004A3BC2 /* LaunchScreen.storyboard */,
 				E6A18A2024B4E344004A3BC2 /* Info.plist */,
 				8C5D5E4E254DDFD3000247A8 /* Key.plist */,
+				8C818B4D258E60070056BF0C /* Assets */,
 				E6E0A15B24B6123D00BAFA45 /* Database */,
 				E6E0A16624B61DFE00BAFA45 /* Delegates */,
+				8C818B48258E5F1C0056BF0C /* Extensions */,
 				E65B2B6824B4E5DB00019D72 /* Models */,
 				E6AAE0CE24B5E46E004F799E /* Other */,
 				E65B2B6D24B4E63500019D72 /* Services */,
 				E65B2B7224B4EA6800019D72 /* Views */,
 				E6E0A16024B61D9A00BAFA45 /* View Models */,
-				E6A18A1A24B4E344004A3BC2 /* Preview Content */,
 			);
 			path = Gametrack;
-			sourceTree = "<group>";
-		};
-		E6A18A1A24B4E344004A3BC2 /* Preview Content */ = {
-			isa = PBXGroup;
-			children = (
-				E6A18A1B24B4E344004A3BC2 /* Preview Assets.xcassets */,
-			);
-			path = "Preview Content";
 			sourceTree = "<group>";
 		};
 		E6AAE0CD24B5E29F004F799E /* SearchView */ = {
@@ -416,9 +438,11 @@
 				E65B2B7C24B4F08500019D72 /* CompletedView.swift in Sources */,
 				E67DC1FC24B649F4008F42D0 /* GamesViewModel.swift in Sources */,
 				E65B2B7624B4EAAC00019D72 /* SearchView.swift in Sources */,
+				8C818B4A258E5F4C0056BF0C /* DateFormatter+Gametrack.swift in Sources */,
 				E65B2B6A24B4E5E900019D72 /* Game.swift in Sources */,
 				E63571B324B732BC00831C9B /* CompletedViewModel.swift in Sources */,
 				E65B2B7824B4EB6100019D72 /* LoadingView.swift in Sources */,
+				8CF05AEB2599D7D600E1AAF7 /* Text+Gametrack.swift in Sources */,
 				E65B2B8224B4FBD000019D72 /* SearchList.swift in Sources */,
 				E6E0A16A24B61F8F00BAFA45 /* SettingsViewModel.swift in Sources */,
 			);
@@ -560,7 +584,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_ASSET_PATHS = "\"Gametrack/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"Gametrack/Assets/Preview Content\"";
 				DEVELOPMENT_TEAM = B2NJF5A6ZC;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = Gametrack/Info.plist;
@@ -582,7 +606,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_ASSET_PATHS = "\"Gametrack/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"Gametrack/Assets/Preview Content\"";
 				DEVELOPMENT_TEAM = B2NJF5A6ZC;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = Gametrack/Info.plist;
