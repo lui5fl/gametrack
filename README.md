@@ -1,4 +1,4 @@
-# Gametrack - iPhone app for keeping track of your gaming backlog
+# Gametrack
 Gametrack is an iPhone app for tracking your progress in videogames. I've started this project with the sole purpose of learning SwiftUI: this means the app may never get finished.
 
 ## Screenshots
